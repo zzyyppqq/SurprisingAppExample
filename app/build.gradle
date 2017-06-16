@@ -18,18 +18,42 @@ android {
         versionName rootProject.ext.versionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
+
+
+        resValue "string", "build_time", buildTime()
+        resValue "string", "build_host", hostName()
+        resValue "string", "build_revision", revision()
+        /**
+         * 在Activity里调用
+         * getString(R.string.build_time)  // 输出2015-11-07 17:01
+         * getString(R.string.build_host)  // 输出jay@deepin，这是我的电脑的用户名和PC名
+         * getString(R.string.build_revision) // 输出3dd5823, 这是最后一次commit的sha值
+         */
     }
 
     signingConfigs {
+        //加载资源
+        Properties properties = new Properties()
+        InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream();
+        properties.load(inputStream)
+        //读取字段
+        def storeFileValue = properties.getProperty('storeFile')
+        def keyAliasValue = properties.getProperty('keyAlias')
+        def keyPasswordValue = properties.getProperty('keyPassword');
+        def storePasswordValue = properties.getProperty('storePassword');
+
         debug {
             storeFile file("debug.keystore")
-        }
-        release {
-            storeFile file("release.keystore")
-//            storeFile file("release.jks")
-            keyAlias 'androiddebugkey'
+            keyAlias 'AndroidDebugKey'
             storePassword 'android'
             keyPassword 'android'
+        }
+
+        release {
+            storeFile file(storeFileValue)
+            keyAlias keyAliasValue
+            storePassword keyPasswordValue
+            keyPassword storePasswordValue
         }
     }
 
@@ -176,4 +200,22 @@ dependencies {
     releaseCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakcanaryVersion}"
     testCompile "com.squareup.leakcanary:leakcanary-android-no-op:${leakcanaryVersion}"
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+}
+
+
+def buildTime() {
+    return new Date().format("yyyy-MM-dd HH:mm:ss")
+}
+
+def hostName() {
+    return System.getProperty("user.name") + "@" + InetAddress.localHost.hostName
+}
+
+def revision() {
+    def code = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = code
+    }
+    return code.toString()
 }
