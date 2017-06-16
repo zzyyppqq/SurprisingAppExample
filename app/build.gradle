@@ -22,8 +22,10 @@ android {
 
 
         buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\"" // 输出2017-06-16 11:46:42
-        buildConfigField "String", "BUILD_HOST", "\"${hostName()}\""// 输出zhangyipeng@localhost，这是我的电脑的用户名和PC名
-        buildConfigField "String", "LASR_GIT_COMMIT_SHA", "\"${revision()}\"" // 输出9def3d3, 这是最后一次commit的sha值
+        buildConfigField "String", "BUILD_HOST", "\"${hostName()}\""
+// 输出zhangyipeng@localhost，这是我的电脑的用户名和PC名
+        buildConfigField "String", "LASR_GIT_COMMIT_SHA", "\"${revision()}\""
+        // 输出9def3d3, 这是最后一次commit的sha值
 
         resValue "string", "build_time", buildTime()
         resValue "string", "build_host", hostName()
@@ -66,7 +68,7 @@ android {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "zyp"]
             manifestPlaceholders = [BAIDU_API_KEY_VALUE: "CC939499621bc8191c63799999b1f987", UMENG_APPKEY_VALUE: "4ef289045270156bd6999998"]
 
-            buildConfigField "String", "BASE_URL", "\"https://api.test\""
+            buildConfigField "String", "BASE_URL", "\"${debug_base_url}\""
             buildConfigField "String[]", "BASE_TEST_URL", "{\"https://api.test\", \"https://api.test1\", \"https://api.test2\", \"https://api.test3\", \"https://api.test4\"}"
             buildConfigField "boolean", "IS_LOG", "true"
             buildConfigField "boolean", "IS_DEBUG", "true"
@@ -84,7 +86,7 @@ android {
             manifestPlaceholders = [UMENG_CHANNEL_VALUE: "zyp"]
             manifestPlaceholders = [BAIDU_API_KEY_VALUE: "CC939499621bc8191c63799999b1f987", UMENG_APPKEY_VALUE: "4ef289045270156bd6999998"]
 
-            buildConfigField "String", "BASE_URL", "\"https://api.release\""
+            buildConfigField "String", "BASE_URL", "\"${release_base_url}\""
             buildConfigField "String[]", "BASE_TEST_URL", "{\"https://api.release1\", \"https://api.release2\"}"
             buildConfigField "boolean", "IS_LOG", "false"
             buildConfigField "boolean", "IS_DEBUG", "false"
@@ -111,6 +113,8 @@ android {
                     fileName = "zyp_v${defaultConfig.versionName}_${variant.productFlavors[0].name}_debug.apk"
                 }
                 output.outputFile = new File(outputFile.parent, fileName)
+                println "====>${fileName}"
+
             }
         }
     }
@@ -204,6 +208,51 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
 }
 
+task upload(type: Exec) {
+    executable 'sh'
+    args "-c", "../upload_pgyer.sh"
+}
+
+task uploadpython(type: Exec) {
+    workingDir './'
+    commandLine "python", "python_demo.py", "one", "two"
+}
+
+
+task compliePre1 {
+    println "============compliePre1============="
+}
+task compliePre2 {
+    println "============compliePre2============="
+}
+
+afterEvaluate {//编译前执行
+    tasks.matching {
+        it.name.startsWith('process') && (it.name.endsWith('ReleaseJavaRes') || it.name.endsWith
+                ('DebugJavaRes'))
+    }.each { task ->
+        task.dependsOn(compliePre1, compliePre2)
+    }
+}
+
+afterEvaluate {//apk打包后上传到蒲公英
+    tasks.matching {
+        it.name.startsWith('install') && it.name.contains("Release")
+    }.each { task ->
+        task.dependsOn(upload)
+    }
+}
+
+afterEvaluate {
+    tasks.findByName('assembleDebug').doLast {
+        println "============buildApkDebug============="
+
+    }
+    tasks.findByName('assembleRelease').doLast {
+        println "============buildApkRelease============="
+    }
+}
+
 
 def buildTime() {
     return new Date().format("yyyy-MM-dd HH:mm:ss")
@@ -220,4 +269,19 @@ def revision() {
         standardOutput = code
     }
     return code.toString().trim()
+}
+
+
+
+task hello << {// <<符号是doLast的缩写
+    println 'Hello Earth'
+}
+hello.doFirst {
+    println 'Hello Venus'
+}
+hello.doLast {
+    println 'Hello Mars'
+}
+hello << {
+    println 'Hello Jupiter'
 }
