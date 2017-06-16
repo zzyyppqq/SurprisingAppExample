@@ -37,15 +37,12 @@ android {
     }
 
     signingConfigs {
-        //加载资源
-        Properties properties = new Properties()
-        InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream();
-        properties.load(inputStream)
-        //读取字段
-        def storeFileValue = properties.getProperty('storeFile')
-        def keyAliasValue = properties.getProperty('keyAlias')
-        def keyPasswordValue = properties.getProperty('keyPassword');
-        def storePasswordValue = properties.getProperty('storePassword');
+//        //加载资源
+//        Properties properties = new Properties()
+//        InputStream inputStream = project.rootProject.file('local.properties').newDataInputStream();
+//        properties.load(inputStream)
+//        //读取字段
+//        def value = properties.getProperty('key')
 
         debug {
             storeFile file("debug.keystore")
