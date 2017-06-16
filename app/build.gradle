@@ -20,14 +20,19 @@ android {
         vectorDrawables.useSupportLibrary = true
 
 
+
+        buildConfigField "String", "BUILD_TIME", "\"${buildTime()}\"" // 输出2017-06-16 11:46:42
+        buildConfigField "String", "BUILD_HOST", "\"${hostName()}\""// 输出zhangyipeng@localhost，这是我的电脑的用户名和PC名
+        buildConfigField "String", "LASR_GIT_COMMIT_SHA", "\"${revision()}\"" // 输出9def3d3, 这是最后一次commit的sha值
+
         resValue "string", "build_time", buildTime()
         resValue "string", "build_host", hostName()
-        resValue "string", "build_revision", revision()
+        resValue "string", "build_git_revision", revision()
         /**
          * 在Activity里调用
-         * getString(R.string.build_time)  // 输出2015-11-07 17:01
-         * getString(R.string.build_host)  // 输出jay@deepin，这是我的电脑的用户名和PC名
-         * getString(R.string.build_revision) // 输出3dd5823, 这是最后一次commit的sha值
+         * getString(R.string.build_time)  // 输出2017-06-16 11:46:42
+         * getString(R.string.build_host)  // 输出zhangyipeng@localhost，这是我的电脑的用户名和PC名
+         * getString(R.string.build_git_revision) // 输出9def3d3, 这是最后一次commit的sha值
          */
     }
 
@@ -217,5 +222,5 @@ def revision() {
         commandLine 'git', 'rev-parse', '--short', 'HEAD'
         standardOutput = code
     }
-    return code.toString()
+    return code.toString().trim()
 }

@@ -2,10 +2,10 @@ package com.zyp.ui.activity;
 
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.design.BuildConfig;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.zyp.BuildConfig;
 import com.zyp.R;
 import com.zyp.app.AppConfig;
 import com.zyp.app.MyApplication;
@@ -29,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final String TAG = "MainActivity";
     private TextView mTextMessage;
+    private TextView tv_buile_info;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         mTextMessage = (TextView) findViewById(R.id.message);
         tv_base_url = (TextView) findViewById(R.id.tv_base_url);
+        tv_buile_info = (TextView) findViewById(R.id.tv_buile_info);
         btn_switch_debug_url = (Button) findViewById(R.id.btn_switch_debug_url);
         btn_switch_deafult_url = (Button) findViewById(R.id.btn_switch_deafult_url);
         btn_export_data = (Button) findViewById(R.id.btn_export_data);
@@ -75,6 +78,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initData() {
+        tv_buile_info.setText("build_time : "+ BuildConfig.BUILD_TIME+"\r\nbuild_host : "+BuildConfig.BUILD_HOST+"\r\nbuild_revision : "+BuildConfig.LASR_GIT_COMMIT_SHA);
+
         final String baseUrl = AppConfig.BASE_URL;
         tv_base_url.setText("当前应用base_ur = " + baseUrl);
         if (AppConfig.IS_DEBUG) {
@@ -83,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             CommonUtil.toastMsg("baseUrl = " + baseUrl);
         }
         Logger.d(TAG, baseUrl);
+
+
     }
 
     @Override
